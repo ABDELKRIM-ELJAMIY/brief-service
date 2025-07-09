@@ -13,7 +13,7 @@ exports.createBrief = async (req, res, next) => {
 
 exports.getAllBriefs = async (req, res, next) => {
     try {
-        const briefs = await Brief.find().populate('competences');
+        const briefs = await Brief.find();
         res.status(200).json(briefs);
     } catch (error) {
         next(error);
@@ -23,7 +23,7 @@ exports.getAllBriefs = async (req, res, next) => {
 // Get a brief by ID
 exports.getBriefById = async (req, res, next) => {
     try {
-        const brief = await Brief.findById(req.params.id).populate('competences');
+        const brief = await Brief.findById(req.params.id);
         if (!brief) {
             return res.status(404).json({ message: 'Brief not found' });
         }
@@ -41,7 +41,7 @@ exports.updateBriefById = async (req, res, next) => {
             req.params.id,
             { title, description, competences, updatedAt: Date.now() },
             { new: true, runValidators: true }
-        ).populate('competences');
+        );
         if (!updatedBrief) {
             return res.status(404).json({ message: 'Brief not found' });
         }
@@ -59,6 +59,60 @@ exports.deleteBriefById = async (req, res, next) => {
             return res.status(404).json({ message: 'Brief not found' });
         }
         res.status(200).json({ message: 'Brief deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Associate a competence to a brief
+exports.addCompetenceToBrief = async (req, res, next) => {
+    try {
+        const { competenceId } = req.body;
+        const brief = await Brief.findByIdAndUpdate(
+            req.params.id,
+            { $addToSet: { competences: competenceId }, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!brief) {
+            return res.status(404).json({ message: 'Brief not found' });
+        }
+        res.status(200).json(brief);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Dissociate a competence from a brief
+exports.removeCompetenceFromBrief = async (req, res, next) => {
+    try {
+        const { competenceId } = req.body;
+        const brief = await Brief.findByIdAndUpdate(
+            req.params.id,
+            { $pull: { competences: competenceId }, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!brief) {
+            return res.status(404).json({ message: 'Brief not found' });
+        }
+        res.status(200).json(brief);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Associate multiple competences to a brief
+exports.addCompetencesToBrief = async (req, res, next) => {
+    try {
+        const { competenceIds } = req.body; 
+        const brief = await Brief.findByIdAndUpdate(
+            req.params.id,
+            { $addToSet: { competences: { $each: competenceIds } }, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!brief) {
+            return res.status(404).json({ message: 'Brief not found' });
+        }
+        res.status(200).json(brief);
     } catch (error) {
         next(error);
     }
