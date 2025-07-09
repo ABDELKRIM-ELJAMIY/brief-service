@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const connectDB = require('./config/db');
-const briefRoutes = require('./routes/briefRoutes');
 const cors = require('cors');
+// Register Competence model
+require('./models/Competence');
+const briefRoutes = require('./routes/briefRoutes');
 
 const app = express();
 connectDB();
