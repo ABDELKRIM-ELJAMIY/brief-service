@@ -103,10 +103,46 @@ exports.removeCompetenceFromBrief = async (req, res, next) => {
 // Associate multiple competences to a brief
 exports.addCompetencesToBrief = async (req, res, next) => {
     try {
-        const { competenceIds } = req.body; 
+        const { competenceIds } = req.body;
         const brief = await Brief.findByIdAndUpdate(
             req.params.id,
             { $addToSet: { competences: { $each: competenceIds } }, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!brief) {
+            return res.status(404).json({ message: 'Brief not found' });
+        }
+        res.status(200).json(brief);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Assign an apprenant to a brief
+exports.assignApprenantToBrief = async (req, res, next) => {
+    try {
+        const { apprenantId } = req.body;
+        const brief = await Brief.findByIdAndUpdate(
+            req.params.id,
+            { $addToSet: { apprenants: apprenantId }, updatedAt: Date.now() },
+            { new: true }
+        );
+        if (!brief) {
+            return res.status(404).json({ message: 'Brief not found' });
+        }
+        res.status(200).json(brief);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Unassign an apprenant from a brief
+exports.unassignApprenantFromBrief = async (req, res, next) => {
+    try {
+        const { apprenantId } = req.body;
+        const brief = await Brief.findByIdAndUpdate(
+            req.params.id,
+            { $pull: { apprenants: apprenantId }, updatedAt: Date.now() },
             { new: true }
         );
         if (!brief) {

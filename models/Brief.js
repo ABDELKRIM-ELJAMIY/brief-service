@@ -13,6 +13,10 @@ const briefSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Competence',
     }],
+    apprenants: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Apprenant',
+    }],
     createdAt: {
         type: Date,
         default: Date.now,
